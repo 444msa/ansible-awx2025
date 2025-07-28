@@ -1,0 +1,26 @@
+---
+- name: Update all Rocky Linux 8 servers
+  hosts: all
+  become: yes
+  tasks:
+
+    - name: Ensure all packages are up to date
+      dnf:
+        name: '*'
+        state: latest
+        update_cache: yes
+
+    - name: Check if a reboot is required
+      register: reboot_required
+      shell: needs-restarting -r; echo $?
+      changed_when: false
+
+    - name: Reboot if required
+      reboot:
+        msg: "Rebooting after updates"
+        connect_timeout: 5
+        reboot_timeout: 600
+        pre_reboot_delay: 0
+        post_reboot_delay: 30
+      when: reboot_required.stdout == "1"
+
