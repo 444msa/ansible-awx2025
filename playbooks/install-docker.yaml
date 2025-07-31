@@ -1,46 +1,16 @@
 ---
-- name: Install Docker on Rocky Linux 8
+- name: Install Podman on Rocky Linux 8
   hosts: all
   become: true
 
   tasks:
-    - name: Install required packages
+    - name: Ensure system is up to date
       dnf:
-        name:
-          - yum-utils
-          - device-mapper-persistent-data
-          - lvm2
-        state: present
-
-    - name: Add Docker repository
-      get_url:
-        url: https://download.docker.com/linux/centos/docker-ce.repo
-        dest: /etc/yum.repos.d/docker-ce.repo
-
-    - name: Enable Docker CE repo for CentOS 8 (compatible with Rocky Linux 8)
-      ini_file:
-        path: /etc/yum.repos.d/docker-ce.repo
-        section: "docker-ce-stable"
-        option: "enabled"
-        value: "1"
-
-    - name: Install Docker Engine
-      dnf:
-        name:
-          - docker-ce
-          - docker-ce-cli
-          - containerd.io
+        name: "*"
         state: latest
+        update_cache: yes
 
-    - name: Start and enable Docker service
-      systemd:
-        name: docker
-        enabled: true
-        state: started
-
-    - name: Add current user to docker group
-      user:
-        name: "{{ ansible_user }}"
-        groups: docker
-        append: yes
+    - name: Install Podman
+      dnf:
+        name: podman
 
